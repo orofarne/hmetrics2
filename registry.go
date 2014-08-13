@@ -86,7 +86,7 @@ func (self *registry) RegisterPackageMetric(name string, metric Metric) error {
 	pkgName := getCallerPackage()
 	var metricKey string
 	if pkgName != "" {
-		metricKey = "pkgName" + "." + name
+		metricKey = pkgName + "." + name
 	} else {
 		metricKey = name
 	}
