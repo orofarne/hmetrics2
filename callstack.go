@@ -6,7 +6,7 @@ import (
 )
 
 func getCallerPackage() string {
-	pc, _, _, ok := runtime.Caller(2)
+	pc, _, _, ok := runtime.Caller(3)
 	if !ok {
 		return ""
 	}
