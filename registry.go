@@ -9,13 +9,41 @@ type registry struct {
 	metrics map[string]Metric
 	period  time.Duration
 	hooks   []func(map[string]float64)
-	mu      sync.RWMutex
+	mu      sync.Mutex
 }
 
 var Registry registry
 
 func init() {
-	Registry.metrics = make(map[string]Metric)
+	Registry.init()
+}
+
+func (self *registry) init() {
+	self.metrics = make(map[string]Metric)
+	self.period = time.Minute
+	go self.ticker()
+}
+
+func (self *registry) ticker() {
+	for {
+		t0 := time.Now()
+
+		self.mu.Lock()
+		period := self.period
+		self.clear()
+		self.mu.Unlock()
+
+		Δt := time.Since(t0)
+		if period > Δt {
+			time.Sleep(period - Δt)
+		}
+	}
+}
+
+func (self *registry) clear() {
+	for _, metric := range self.metrics {
+		metric.Clear()
+	}
 }
 
 func (self *registry) SetPeriod(period time.Duration) {
