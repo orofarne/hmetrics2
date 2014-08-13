@@ -12,10 +12,10 @@ type registry struct {
 	mu      sync.Mutex
 }
 
-var Registry registry
+var HRegistry registry
 
 func init() {
-	Registry.init()
+	HRegistry.init()
 }
 
 func (self *registry) init() {
