@@ -2,7 +2,6 @@ package expvarexport
 
 import (
 	"expvar"
-	"log"
 	"sync"
 )
 
@@ -20,6 +19,5 @@ func Exporter(namespace string) func(map[string]float64) {
 		mu.Lock()
 		data = newData
 		mu.Unlock()
-		log.Print(data)
 	}
 }
