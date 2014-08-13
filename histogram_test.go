@@ -1,20 +1,12 @@
 package hmetrics2
 
 import (
-	"math"
-
 	. "gopkg.in/check.v1"
 )
 
 type HistogramSuite struct{}
 
 var _ = Suite(&HistogramSuite{})
-
-func (s *HistogramSuite) TestMath(c *C) {
-	c.Check(math.Inf(1) > 3.0, Equals, true)
-	c.Check(math.Inf(-1) < 3.0, Equals, true)
-	c.Check(math.Inf(-1) < math.Inf(1), Equals, true)
-}
 
 func (s *HistogramSuite) TestHistogramOn10Numbers(c *C) {
 	var hist = NewHistogram()
@@ -24,13 +16,7 @@ func (s *HistogramSuite) TestHistogramOn10Numbers(c *C) {
 		hist.AddPoint(point)
 	}
 
-	c.Check(hist.Count(), Equals, uint64(10))
-	c.Check(hist.Avg(), Near, ((1.0 + 10.0) / 2.0), 0.0001)
-	c.Check(hist.Max(), Near, 10.0, 0.0001)
-	c.Check(hist.Min(), Near, 1.0, 0.0001)
-	c.Check(hist.Percentiles([]float64{0.5})[0], In, 5.0, 6.0)
-
-	var stat map[string]float64 = hist.Stat()
+	var stat map[string]float64 = hist.StatAndClear()
 	c.Check(len(stat), Equals, 10)
 	c.Check(stat["count"], Near, 10.0, 0.0001)
 	c.Check(stat["avg"], Near, ((1.0 + 10.0) / 2.0), 0.0001)

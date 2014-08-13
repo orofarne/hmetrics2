@@ -41,8 +41,19 @@ func (self *registry) ticker() {
 }
 
 func (self *registry) clear() {
-	for _, metric := range self.metrics {
-		metric.Clear()
+	self.mu.Lock()
+	defer self.mu.Unlock()
+
+	data := make(map[string]float64)
+	for key, metric := range self.metrics {
+		metricData := metric.StatAndClear()
+		for subKey, val := range metricData {
+			data[key+"."+subKey] = val
+		}
+	}
+
+	for _, hook := range self.hooks {
+		hook(data)
 	}
 }
 

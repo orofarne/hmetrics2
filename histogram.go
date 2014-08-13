@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"math"
 	"sort"
+	"sync"
 )
 
 type Histogram struct {
+	mu     sync.Mutex
 	values []float64
 	min    float64
 	max    float64
@@ -25,6 +27,9 @@ func NewHistogram() *Histogram {
 // Add point to histogram
 // Not threadsafe!
 func (self *Histogram) AddPoint(val float64) {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+
 	self.values = append(self.values, val)
 	if val < self.min {
 		self.min = val
@@ -36,7 +41,7 @@ func (self *Histogram) AddPoint(val float64) {
 	self.count++
 }
 
-func (self *Histogram) Clear() {
+func (self *Histogram) clear() {
 	self.values = nil
 	self.min = math.Inf(1)
 	self.max = math.Inf(-1)
@@ -44,23 +49,7 @@ func (self *Histogram) Clear() {
 	self.count = 0
 }
 
-func (self *Histogram) Min() float64 {
-	return self.min
-}
-
-func (self *Histogram) Max() float64 {
-	return self.max
-}
-
-func (self *Histogram) Avg() float64 {
-	return self.sum / float64(self.count)
-}
-
-func (self *Histogram) Count() uint64 {
-	return self.count
-}
-
-func (self *Histogram) Percentiles(ps []float64) []float64 {
+func (self *Histogram) percentiles(ps []float64) []float64 {
 	scores := make([]float64, len(ps))
 	size := len(self.values)
 	if size > 0 {
@@ -81,18 +70,23 @@ func (self *Histogram) Percentiles(ps []float64) []float64 {
 	return scores
 }
 
-func (self *Histogram) Stat() (stat map[string]float64) {
+func (self *Histogram) StatAndClear() (stat map[string]float64) {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+
 	stat = make(map[string]float64)
 	// Basic statistics
-	stat["min"] = self.Min()
-	stat["max"] = self.Max()
-	stat["avg"] = self.Avg()
-	stat["count"] = float64(self.Count())
+	stat["min"] = self.min
+	stat["max"] = self.max
+	stat["avg"] = self.sum / float64(self.count)
+	stat["count"] = float64(self.count)
 	// Percentiles
 	percs := []float64{0.5, 0.75, 0.95, 0.99, 0.999, 1.0}
-	percsValues := self.Percentiles(percs)
+	percsValues := self.percentiles(percs)
 	for i, p := range percsValues {
 		stat[fmt.Sprintf("percentile_%v", percs[i])] = p
 	}
+	// Clear data
+	self.clear()
 	return
 }
