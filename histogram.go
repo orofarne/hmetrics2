@@ -26,7 +26,7 @@ func NewHistogram() *Histogram {
 // Not threadsafe!
 func (self *Histogram) AddPoint(val float64) {
 	self.values = append(self.values, val)
-	if val > self.min {
+	if val < self.min {
 		self.min = val
 	}
 	if val > self.max {
@@ -66,7 +66,7 @@ func (self *Histogram) Percentiles(ps []float64) []float64 {
 	if size > 0 {
 		sort.Float64s(self.values)
 		for i, p := range ps {
-			pos := p * float64(size+1)
+			pos := p * float64(size)
 			if pos < 1.0 {
 				scores[i] = float64(self.values[0])
 			} else if pos >= float64(size) {
@@ -86,13 +86,13 @@ func (self *Histogram) Stat() (stat map[string]float64) {
 	// Basic statistics
 	stat["min"] = self.Min()
 	stat["max"] = self.Max()
-	stat["avg"] = float64(self.Count())
+	stat["avg"] = self.Avg()
 	stat["count"] = float64(self.Count())
 	// Percentiles
-	percs := []float64{0.5, 0.75, 0.95, 0.99, 0.999}
+	percs := []float64{0.5, 0.75, 0.95, 0.99, 0.999, 1.0}
 	percsValues := self.Percentiles(percs)
 	for i, p := range percsValues {
-		stat[fmt.Sprintf("percentile_%f", percs[i])] = p
+		stat[fmt.Sprintf("percentile_%v", percs[i])] = p
 	}
 	return
 }

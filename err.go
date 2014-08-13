@@ -15,5 +15,5 @@ func newMetricAlreadyExistsError(name string) *MetricAlreadyExists {
 }
 
 func (self *MetricAlreadyExists) Error() string {
-	return fmt.Sprintf("Metric %s already exists", self.metricName)
+	return fmt.Sprintf("Metric \"%s\" already exists", self.metricName)
 }
