@@ -5,8 +5,8 @@ import (
 	"log"
 	"time"
 
-	hmetrics2 ".."
-	"../expvarexport"
+	"github.com/orofarne/hmetrics2"
+	"github.com/orofarne/hmetrics2/expvarexport"
 )
 
 func main() {

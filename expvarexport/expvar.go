@@ -7,7 +7,7 @@ import (
 
 func Exporter(namespace string) func(map[string]float64) {
 	var mu sync.Mutex
-	var data map[string]float64
+	var data = make(map[string]float64)
 
 	expvar.Publish(namespace, expvar.Func(func() interface{} {
 		mu.Lock()
