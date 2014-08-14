@@ -12,10 +12,10 @@ type registry struct {
 	mu      sync.Mutex
 }
 
-var HRegistry registry
+var hRegistry registry
 
 func init() {
-	HRegistry.init()
+	hRegistry.init()
 }
 
 func (self *registry) init() {
@@ -54,38 +54,38 @@ func (self *registry) clear() {
 	}
 }
 
-func (self *registry) SetPeriod(period time.Duration) {
-	self.mu.Lock()
-	defer self.mu.Unlock()
-	self.period = period
+func SetPeriod(period time.Duration) {
+	hRegistry.mu.Lock()
+	defer hRegistry.mu.Unlock()
+	hRegistry.period = period
 }
 
-func (self *registry) AddHook(hook func(map[string]float64)) {
-	self.mu.Lock()
-	defer self.mu.Unlock()
-	self.hooks = append(self.hooks, hook)
+func AddHook(hook func(map[string]float64)) {
+	hRegistry.mu.Lock()
+	defer hRegistry.mu.Unlock()
+	hRegistry.hooks = append(hRegistry.hooks, hook)
 }
 
 // Register global metric and returns it and error
-func (self *registry) RegisterGlobalMetric(name string, metric Metric) (Metric, error) {
-	self.mu.Lock()
-	defer self.mu.Unlock()
-	if _, found := self.metrics[name]; found {
+func RegisterGlobalMetric(name string, metric Metric) (Metric, error) {
+	hRegistry.mu.Lock()
+	defer hRegistry.mu.Unlock()
+	if _, found := hRegistry.metrics[name]; found {
 		return metric, newMetricAlreadyExistsError(name)
 	}
-	self.metrics[name] = metric
+	hRegistry.metrics[name] = metric
 	return metric, nil
 }
 
 // Register global metric and returns it or panic
-func (self *registry) MustRegisterGlobalMetric(name string, metric Metric) Metric {
-	if _, err := self.RegisterGlobalMetric(name, metric); err != nil {
+func MustRegisterGlobalMetric(name string, metric Metric) Metric {
+	if _, err := RegisterGlobalMetric(name, metric); err != nil {
 		panic(err.Error())
 	}
 	return metric
 }
 
-func (self *registry) RegisterPackageMetric(name string, metric Metric) (Metric, error) {
+func RegisterPackageMetric(name string, metric Metric) (Metric, error) {
 	pkgName := getCallerPackage()
 	var metricKey string
 	if pkgName != "" {
@@ -93,11 +93,11 @@ func (self *registry) RegisterPackageMetric(name string, metric Metric) (Metric,
 	} else {
 		metricKey = name
 	}
-	return self.RegisterGlobalMetric(metricKey, metric)
+	return RegisterGlobalMetric(metricKey, metric)
 }
 
-func (self *registry) MustRegisterPackageMetric(name string, metric Metric) Metric {
-	if _, err := self.RegisterPackageMetric(name, metric); err != nil {
+func MustRegisterPackageMetric(name string, metric Metric) Metric {
+	if _, err := RegisterPackageMetric(name, metric); err != nil {
 		panic(err.Error())
 	}
 	return metric
