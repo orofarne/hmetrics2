@@ -17,7 +17,7 @@ func (s *HistogramSuite) TestHistogramOn10Numbers(c *C) {
 	}
 
 	var stat map[string]float64 = hist.StatAndClear()
-	c.Check(len(stat), Equals, 10)
+	c.Check(len(stat), Equals, 11)
 	c.Check(stat["count"], Near, 10.0, 0.0001)
 	c.Check(stat["avg"], Near, ((1.0 + 10.0) / 2.0), 0.0001)
 	c.Check(stat["max"], Near, 10.0, 0.0001)
@@ -32,4 +32,6 @@ func (s *HistogramSuite) TestHistogramOn10Numbers(c *C) {
 	c.Check(stat["percentile_0.99"], In, 9.0, 10.0)
 	c.Check(stat["percentile_0.999"], In, 9.0, 10.0)
 	c.Check(stat["percentile_1"], Near, 10.0, 0.0001)
+	//
+	c.Check(stat["rps"] > 10.0, Equals, true)
 }

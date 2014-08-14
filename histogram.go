@@ -5,6 +5,7 @@ import (
 	"math"
 	"sort"
 	"sync"
+	"time"
 )
 
 type Histogram struct {
@@ -14,13 +15,15 @@ type Histogram struct {
 	max    float64
 	sum    float64
 	count  uint64
+	since  time.Time
 }
 
 // Create new metric
 func NewHistogram() *Histogram {
 	return &Histogram{
-		min: math.Inf(1),
-		max: math.Inf(-1),
+		min:   math.Inf(1),
+		max:   math.Inf(-1),
+		since: time.Now(),
 	}
 }
 
@@ -47,6 +50,7 @@ func (self *Histogram) clear() {
 	self.max = math.Inf(-1)
 	self.sum = 0.0
 	self.count = 0
+	self.since = time.Now()
 }
 
 func (self *Histogram) percentiles(ps []float64) []float64 {
@@ -86,6 +90,9 @@ func (self *Histogram) StatAndClear() (stat map[string]float64) {
 	for i, p := range percsValues {
 		stat[fmt.Sprintf("percentile_%v", percs[i])] = p
 	}
+	// RPS
+	period := time.Since(self.since)
+	stat["rps"] = float64(self.count) / period.Seconds()
 	// Clear data
 	self.clear()
 	return
