@@ -1,10 +1,24 @@
 HMETRICS2
 =========
 
+Build Status
+------------
+
 ![Build Status](https://travis-ci.org/orofarne/hmetrics2.svg)
 
-USAGE
------
+
+Install
+-------
+```bash
+go get 'github.com/orofarne/hmetrics2'
+```
+
+API
+---
+https://gowalker.org/github.com/orofarne/hmetrics2
+
+Example
+-------
 
     package main
 
