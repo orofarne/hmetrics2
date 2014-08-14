@@ -12,6 +12,12 @@ Install
 ```bash
 go get 'github.com/orofarne/hmetrics2'
 ```
+If you want to build tests or example, please use GOM (https://github.com/mattn/gom)
+Build tests:
+```bash
+gom -test install
+gom test
+```
 
 API
 ---
@@ -19,27 +25,10 @@ https://gowalker.org/github.com/orofarne/hmetrics2
 
 Example
 -------
-
-    package main
-
-    import (
-            "expvar"
-            "log"
-            "time"
-
-            . "github.com/orofarne/hmetrics2"
-            "github.com/orofarne/hmetrics2/expvarexport"
-    )
-
-    func main() {
-            HRegistry.SetPeriod(10 * time.Second)
-            HRegistry.AddHook(expvarexport.Exporter("test"))
-            h := NewHistogram()
-            HRegistry.MustRegisterPackageMetric("my_metric", h)
-            for {
-                    h.AddPoint(3.14)
-                    log.Print(expvar.Get("test"))
-                    time.Sleep(time.Second)
-            }
-    }
+see ./example/example.go
+build it:
+```bash
+gom build -o ex1 ./example/example.go
+./ex1
+```
 
