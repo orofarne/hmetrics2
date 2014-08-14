@@ -66,23 +66,26 @@ func (self *registry) AddHook(hook func(map[string]float64)) {
 	self.hooks = append(self.hooks, hook)
 }
 
-func (self *registry) RegisterGlobalMetric(name string, metric Metric) error {
+// Register global metric and returns it and error
+func (self *registry) RegisterGlobalMetric(name string, metric Metric) (Metric, error) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	if _, found := self.metrics[name]; found {
-		return newMetricAlreadyExistsError(name)
+		return metric, newMetricAlreadyExistsError(name)
 	}
 	self.metrics[name] = metric
-	return nil
+	return metric, nil
 }
 
-func (self *registry) MustRegisterGlobalMetric(name string, metric Metric) {
-	if err := self.RegisterGlobalMetric(name, metric); err != nil {
+// Register global metric and returns it or panic
+func (self *registry) MustRegisterGlobalMetric(name string, metric Metric) Metric {
+	if _, err := self.RegisterGlobalMetric(name, metric); err != nil {
 		panic(err.Error())
 	}
+	return metric
 }
 
-func (self *registry) RegisterPackageMetric(name string, metric Metric) error {
+func (self *registry) RegisterPackageMetric(name string, metric Metric) (Metric, error) {
 	pkgName := getCallerPackage()
 	var metricKey string
 	if pkgName != "" {
@@ -93,8 +96,9 @@ func (self *registry) RegisterPackageMetric(name string, metric Metric) error {
 	return self.RegisterGlobalMetric(metricKey, metric)
 }
 
-func (self *registry) MustRegisterPackageMetric(name string, metric Metric) {
-	if err := self.RegisterPackageMetric(name, metric); err != nil {
+func (self *registry) MustRegisterPackageMetric(name string, metric Metric) Metric {
+	if _, err := self.RegisterPackageMetric(name, metric); err != nil {
 		panic(err.Error())
 	}
+	return metric
 }
