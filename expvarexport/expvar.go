@@ -2,12 +2,13 @@ package expvarexport
 
 import (
 	"expvar"
+	"math"
 	"sync"
 )
 
 func Exporter(namespace string) func(map[string]float64) {
 	var mu sync.Mutex
-	var data = make(map[string]float64)
+	var data = make(map[string]*float64)
 
 	expvar.Publish(namespace, expvar.Func(func() interface{} {
 		mu.Lock()
@@ -17,7 +18,14 @@ func Exporter(namespace string) func(map[string]float64) {
 
 	return func(newData map[string]float64) {
 		mu.Lock()
-		data = newData
+		data = make(map[string]*float64)
+		for k, v := range newData {
+			if math.IsNaN(v) || math.IsInf(v, 0) {
+				data[k] = nil
+			} else {
+				data[k] = &v
+			}
+		}
 		mu.Unlock()
 	}
 }

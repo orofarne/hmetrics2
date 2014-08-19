@@ -30,7 +30,7 @@ func (self *registry) ticker() {
 
 		self.mu.Lock()
 		period := self.period
-		self.clear()
+		self.hookAndClear()
 		self.mu.Unlock()
 
 		Δt := time.Since(t0)
@@ -40,7 +40,7 @@ func (self *registry) ticker() {
 	}
 }
 
-func (self *registry) clear() {
+func (self *registry) hookAndClear() {
 	data := make(map[string]float64)
 	for key, metric := range self.metrics {
 		metricData := metric.StatAndClear()
