@@ -50,7 +50,9 @@ func (self *registry) hookAndClear() {
 	}
 
 	for _, hook := range self.hooks {
-		hook(data)
+		if hook != nil {
+			hook(data)
+		}
 	}
 }
 
@@ -60,10 +62,17 @@ func SetPeriod(period time.Duration) {
 	hRegistry.period = period
 }
 
-func AddHook(hook func(map[string]float64)) {
+func AddHook(hook func(map[string]float64)) (id int) {
 	hRegistry.mu.Lock()
 	defer hRegistry.mu.Unlock()
 	hRegistry.hooks = append(hRegistry.hooks, hook)
+	return len(hRegistry.hooks) - 1
+}
+
+func RemoveHook(id int) {
+	hRegistry.mu.Lock()
+	defer hRegistry.mu.Unlock()
+	hRegistry.hooks[id] = nil
 }
 
 // Register global metric and returns it and error
@@ -101,4 +110,23 @@ func MustRegisterPackageMetric(name string, metric Metric) Metric {
 		panic(err.Error())
 	}
 	return metric
+}
+
+// Unregister global metric and returns error
+func UnregisterGlobalMetric(name string) {
+	hRegistry.mu.Lock()
+	defer hRegistry.mu.Unlock()
+	delete(hRegistry.metrics, name)
+}
+
+// Unregister global metric and returns it and error
+func UnregisterPackageMetric(name string) {
+	pkgName := getCallerPackage()
+	var metricKey string
+	if pkgName != "" {
+		metricKey = pkgName + "." + name
+	} else {
+		metricKey = name
+	}
+	UnregisterGlobalMetric(metricKey)
 }
