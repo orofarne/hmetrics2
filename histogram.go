@@ -28,7 +28,6 @@ func NewHistogram() *Histogram {
 }
 
 // Add point to histogram
-// Not threadsafe!
 func (self *Histogram) AddPoint(val float64) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
