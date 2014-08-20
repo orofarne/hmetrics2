@@ -23,7 +23,9 @@ func Exporter(namespace string) func(map[string]float64) {
 			if math.IsNaN(v) || math.IsInf(v, 0) {
 				data[k] = nil
 			} else {
-				data[k] = &v
+				val := new(float64)
+				*val = v
+				data[k] = val
 			}
 		}
 		mu.Unlock()

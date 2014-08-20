@@ -92,6 +92,7 @@ func (self *Histogram) StatAndClear() (stat map[string]float64) {
 	}
 	// RPS
 	period := time.Since(self.since)
+	self.since = time.Now()
 	stat["rps"] = float64(self.count) / period.Seconds()
 	// Clear data
 	self.clear()
