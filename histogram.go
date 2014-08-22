@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"math"
 	"sort"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -87,7 +89,8 @@ func (self *Histogram) StatAndClear() (stat map[string]float64) {
 	percs := []float64{0.5, 0.75, 0.95, 0.99, 0.999, 1.0}
 	percsValues := self.percentiles(percs)
 	for i, p := range percsValues {
-		stat[fmt.Sprintf("percentile_%v", percs[i])] = p
+		percKey := strings.Replace(strconv.FormatFloat(percs[i], 'g', -1, 64), ".", "_", -1)
+		stat[fmt.Sprintf("percentile.%v", percKey)] = p
 	}
 	// RPS
 	period := time.Since(self.since)

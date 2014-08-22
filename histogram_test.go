@@ -26,12 +26,12 @@ func (s *HistogramSuite) TestHistogramOn10Numbers(c *C) {
 	// > quantile(c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), c(0.5, 0.75, 0.95, 0.99, 0.999, 1))
 	// 50%    75%    95%    99%    99.9%   100%
 	// 5.500  7.750  9.550  9.910  9.991   10.000
-	c.Check(stat["percentile_0.5"], In, 5.0, 6.0)
-	c.Check(stat["percentile_0.75"], In, 7.0, 8.0)
-	c.Check(stat["percentile_0.95"], In, 9.0, 10.0)
-	c.Check(stat["percentile_0.99"], In, 9.0, 10.0)
-	c.Check(stat["percentile_0.999"], In, 9.0, 10.0)
-	c.Check(stat["percentile_1"], Near, 10.0, 0.0001)
+	c.Check(stat["percentile.0_5"], In, 5.0, 6.0)
+	c.Check(stat["percentile.0_75"], In, 7.0, 8.0)
+	c.Check(stat["percentile.0_95"], In, 9.0, 10.0)
+	c.Check(stat["percentile.0_99"], In, 9.0, 10.0)
+	c.Check(stat["percentile.0_999"], In, 9.0, 10.0)
+	c.Check(stat["percentile.1"], Near, 10.0, 0.0001)
 	//
 	c.Check(stat["rps"] > 10.0, Equals, true)
 }
