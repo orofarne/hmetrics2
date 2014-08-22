@@ -30,8 +30,10 @@ func (self *registry) ticker() {
 
 		self.mu.Lock()
 		period := self.period
-		self.hookAndClear()
+		data := self.getDataAndClear()
 		self.mu.Unlock()
+
+		go self.processHooks(data)
 
 		Δt := time.Since(t0)
 		if period > Δt {
@@ -40,7 +42,7 @@ func (self *registry) ticker() {
 	}
 }
 
-func (self *registry) hookAndClear() {
+func (self *registry) getDataAndClear() map[string]float64 {
 	data := make(map[string]float64)
 	for key, metric := range self.metrics {
 		metricData := metric.StatAndClear()
@@ -48,7 +50,10 @@ func (self *registry) hookAndClear() {
 			data[key+"."+subKey] = val
 		}
 	}
+	return data
+}
 
+func (self *registry) processHooks(data map[string]float64) {
 	for _, hook := range self.hooks {
 		if hook != nil {
 			hook(data)
