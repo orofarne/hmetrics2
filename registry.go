@@ -25,20 +25,24 @@ func (self *registry) init() {
 }
 
 func (self *registry) ticker() {
+	self.mu.Lock()
+	period := self.period
+	t0 := time.Now()
+	self.mu.Unlock()
+
 	for {
-		t0 := time.Now()
-
-		self.mu.Lock()
-		period := self.period
-		data := self.getDataAndClear()
-		self.mu.Unlock()
-
-		go self.processHooks(data)
-
 		Δt := time.Since(t0)
 		if period > Δt {
 			time.Sleep(period - Δt)
 		}
+
+		self.mu.Lock()
+		data := self.getDataAndClear()
+		period = self.period
+		t0 = time.Now()
+		self.mu.Unlock()
+
+		go self.processHooks(data)
 	}
 }
 
